@@ -44,6 +44,20 @@ async function seed() {
     await userRepo.save(staff);
     console.log('✓ Lab staff user created');
 
+    // Seed Customer User (for testing)
+    const customerPassword = await hashPassword('password123');
+    const customer = userRepo.create({
+      firstName: 'John',
+      lastName: 'Customer',
+      email: 'customer@labease.com',
+      password: customerPassword,
+      phone: '5555555555',
+      role: 'CUSTOMER',
+      isActive: true,
+    });
+    await userRepo.save(customer);
+    console.log('✓ Customer user created');
+
     // Seed Categories
     const categories = [
       { name: 'Blood Tests', description: 'Complete blood work analysis', icon: '🩸' },

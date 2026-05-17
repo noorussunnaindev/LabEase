@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FiHome, FiCalendar, FiFileText, FiCreditCard, FiUsers, FiSettings, FiBarChart3 } from 'react-icons/fi';
+import { FiHome, FiCalendar, FiFileText, FiCreditCard, FiUsers, FiSettings, FiBarChart2 } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext.jsx';
 
 export default function Sidebar({ isOpen, userType }) {
@@ -11,25 +11,25 @@ export default function Sidebar({ isOpen, userType }) {
     switch (userType) {
       case 'customer':
         return [
-          { icon: FiHome, label: 'Dashboard', path: '/customer/dashboard' },
-          { icon: FiCalendar, label: 'My Bookings', path: '/customer/bookings' },
-          { icon: FiFileText, label: 'Reports', path: '/customer/reports' },
-          { icon: FiCreditCard, label: 'Payments', path: '/customer/dashboard' },
-          { icon: FiSettings, label: 'Settings', path: '/customer/dashboard' },
+          { id: 'customer-dashboard', icon: FiHome, label: 'Dashboard', path: '/customer/dashboard' },
+          { id: 'customer-bookings', icon: FiCalendar, label: 'My Bookings', path: '/customer/bookings' },
+          { id: 'customer-reports', icon: FiFileText, label: 'Reports', path: '/customer/reports' },
+          { id: 'customer-payments', icon: FiCreditCard, label: 'Payments', path: '/customer/dashboard' },
+          { id: 'customer-settings', icon: FiSettings, label: 'Settings', path: '/customer/dashboard' },
         ];
       case 'staff':
         return [
-          { icon: FiHome, label: 'Dashboard', path: '/staff/dashboard' },
-          { icon: FiCalendar, label: 'Bookings', path: '/staff/bookings' },
-          { icon: FiFileText, label: 'Reports', path: '/staff/bookings' },
+          { id: 'staff-dashboard', icon: FiHome, label: 'Dashboard', path: '/staff/dashboard' },
+          { id: 'staff-bookings', icon: FiCalendar, label: 'Bookings', path: '/staff/bookings' },
+          { id: 'staff-reports', icon: FiFileText, label: 'Reports', path: '/staff/bookings' },
         ];
       case 'admin':
         return [
-          { icon: FiHome, label: 'Dashboard', path: '/admin/dashboard' },
-          { icon: FiCalendar, label: 'Bookings', path: '/admin/bookings' },
-          { icon: FiFileText, label: 'Tests', path: '/admin/tests' },
-          { icon: FiUsers, label: 'Users', path: '/admin/users' },
-          { icon: FiBarChart3, label: 'Analytics', path: '/admin/dashboard' },
+          { id: 'admin-dashboard', icon: FiHome, label: 'Dashboard', path: '/admin/dashboard' },
+          { id: 'admin-bookings', icon: FiCalendar, label: 'Bookings', path: '/admin/bookings' },
+          { id: 'admin-tests', icon: FiFileText, label: 'Tests', path: '/admin/tests' },
+          { id: 'admin-users', icon: FiUsers, label: 'Users', path: '/admin/users' },
+          { id: 'admin-analytics', icon: FiBarChart2, label: 'Analytics', path: '/admin/dashboard' },
         ];
       default:
         return [];

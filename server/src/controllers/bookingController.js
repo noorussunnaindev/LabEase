@@ -146,7 +146,9 @@ export const searchBookings = async (req, res, next) => {
 
 export const getBookingStats = async (req, res, next) => {
   try {
-    const stats = await bookingService.getBookingStats(req.user.id);
+    // Admin gets all stats, customers get their own stats
+    const userId = req.user.role === 'ADMIN' ? null : req.user.id;
+    const stats = await bookingService.getBookingStats(userId);
 
     res.status(200).json({
       success: true,

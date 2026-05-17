@@ -16,7 +16,9 @@ const router = express.Router();
 // Customer routes
 router.post('/', authenticate, authorize('CUSTOMER'), createBooking);
 router.get('/my-bookings', authenticate, authorize('CUSTOMER'), getMyBookings);
-router.get('/stats', authenticate, authorize('CUSTOMER'), getBookingStats);
+
+// Stats - accessible to all authenticated users (filtered by role in controller)
+router.get('/stats', authenticate, getBookingStats);
 router.get('/id/:id', authenticate, getBooking);
 router.put('/:id/cancel', authenticate, cancelBooking);
 

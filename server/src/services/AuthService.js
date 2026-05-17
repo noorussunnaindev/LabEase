@@ -5,7 +5,7 @@ import { AppError } from '../middleware/errorHandler.js';
 
 export class AuthService {
   async register(userData) {
-    const { email, password, firstName, lastName, phone } = userData;
+    const { email, password, firstName, lastName, phone, role } = userData;
 
     if (!validateEmail(email)) {
       throw new AppError('Invalid email format', 400);
@@ -26,7 +26,8 @@ export class AuthService {
       firstName,
       lastName,
       phone,
-      role: 'CUSTOMER'
+      role: role || 'CUSTOMER', // Default to CUSTOMER if not provided
+      isActive: true
     });
 
     const savedUser = await repository.save(user);

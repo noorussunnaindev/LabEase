@@ -6,10 +6,44 @@ const authService = new AuthService();
 
 export const register = async (req, res, next) => {
   try {
-    const { email, password, firstName, lastName, phone } = req.body;
+    let { email, password, firstName, lastName, name, phone, role } = req.body;
 
-    if (!email || !password || !firstName || !lastName) {
-      throw new AppError('Missing required fields', 400);
+    // Debug logging
+    console.log('📝 Register Request Body:', req.body);
+
+    // Handle 'name' field - split it into firstName and lastName if provided
+    if (name && (!firstName || !lastName)) {
+      const nameParts = name.trim().split(' ');
+      firstName = firstName || nameParts[0];
+      lastName = lastName || nameParts.slice(1).join(' ') || nameParts[0];
+    }
+
+    console.log('📝 Parsed fields:', { email, password, firstName, lastName, phone, role });
+
+    // Detailed validation with specific error messages
+    if (!firstName || firstName.trim() === '') {
+      throw new AppError('First name is required', 400);
+    }
+    if (!lastName || lastName.trim() === '') {
+      throw new AppError('Last name is required', 400);
+    }
+    if (!email || email.trim() === '') {
+      throw new AppError('Email is required', 400);
+    }
+    if (!validateEmail(email)) {
+      throw new AppError('Please enter a valid email address', 400);
+    }
+    if (!password || password.trim() === '') {
+      throw new AppError('Password is required', 400);
+    }
+    if (password.length < 6) {
+      throw new AppError('Password must be at least 6 characters long', 400);
+    }
+
+    // For security: users registering via API always get CUSTOMER role
+    // If someone tries to set admin/staff role during registration, ignore it
+    if (role && role !== 'CUSTOMER') {
+      console.warn(`⚠️  User attempted to set privileged role '${role}' during registration. Ignoring.`);
     }
 
     const result = await authService.register({
@@ -17,7 +51,8 @@ export const register = async (req, res, next) => {
       password,
       firstName,
       lastName,
-      phone
+      phone,
+      role: 'CUSTOMER' // Always set to CUSTOMER for security
     });
 
     res.status(201).json({
