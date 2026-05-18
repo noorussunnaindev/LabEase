@@ -18,11 +18,13 @@ router.get('/profile', authenticate, getProfile);
 router.put('/profile', authenticate, updateProfile);
 router.post('/change-password', authenticate, changePassword);
 
-// Admin routes
-router.get('/', authenticate, authorize('ADMIN'), getAllUsers);
+// Admin routes - specific routes first
+router.get('/stats', authenticate, authorize('ADMIN'), getUserStats);
 router.get('/role/:role', authenticate, authorize('ADMIN'), getUsersByRole);
+
+// Parameterized routes
+router.get('/', authenticate, authorize('ADMIN'), getAllUsers);
 router.put('/:id/activate', authenticate, authorize('ADMIN'), activateUser);
 router.put('/:id/deactivate', authenticate, authorize('ADMIN'), deactivateUser);
-router.get('/stats', authenticate, authorize('ADMIN'), getUserStats);
 
 export default router;

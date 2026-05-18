@@ -19,14 +19,18 @@ export const authenticate = (req, res, next) => {
 
 export const authorize = (...roles) => {
   return (req, res, next) => {
-    if (!req.user) {
-      throw new AppError('User not authenticated', 401);
-    }
+    try {
+      if (!req.user) {
+        throw new AppError('User not authenticated', 401);
+      }
 
-    if (!roles.includes(req.user.role)) {
-      throw new AppError('Unauthorized access', 403);
-    }
+      if (!roles.includes(req.user.role)) {
+        throw new AppError('Unauthorized access', 403);
+      }
 
-    next();
+      next();
+    } catch (error) {
+      next(error);
+    }
   };
 };

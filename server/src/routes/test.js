@@ -12,11 +12,13 @@ import { authenticate, authorize } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Public routes
-router.get('/', getTests);
+// Public routes - specific routes first
 router.get('/search', searchTests);
-router.get('/:id', getTestById);
 router.get('/category/:categoryId', getTestsByCategory);
+
+// Parameterized routes
+router.get('/:id', getTestById);
+router.get('/', getTests);
 
 // Admin only
 router.post('/', authenticate, authorize('ADMIN'), createTest);

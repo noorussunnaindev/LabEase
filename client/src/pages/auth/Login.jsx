@@ -39,7 +39,9 @@ export default function Login() {
 
     if (result.success) {
       toast.success(`Login successful! Welcome ${result.user.firstName}`);
-      navigate(`/${result.user.role.toLowerCase()}/dashboard`);
+      // Map role to dashboard path
+      const rolePath = result.user.role === 'LAB_STAFF' ? 'staff' : result.user.role.toLowerCase();
+      navigate(`/${rolePath}/dashboard`);
     } else {
       toast.error(result.error);
     }

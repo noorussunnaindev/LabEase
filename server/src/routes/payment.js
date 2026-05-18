@@ -15,13 +15,15 @@ const router = express.Router();
 // Webhook (no auth needed)
 router.post('/webhook', express.raw({ type: 'application/json' }), handleWebhook);
 
-// Stats - accessible to all authenticated users (filtered by role in controller)
+// Specific routes (must come before parameterized routes)
 router.get('/stats', authenticate, getPaymentStats);
+router.get('/my-payments', authenticate, authorize('CUSTOMER'), getPaymentsByUser);
+
+// Parameterized routes
+router.get('/status/:sessionId', authenticate, getPaymentStatus);
 
 // Customer routes
 router.post('/create-session', authenticate, authorize('CUSTOMER'), createPaymentSession);
-router.get('/status/:sessionId', authenticate, getPaymentStatus);
-router.get('/my-payments', authenticate, authorize('CUSTOMER'), getPaymentsByUser);
 
 // Admin routes
 router.get('/', authenticate, authorize('ADMIN'), getAllPayments);
