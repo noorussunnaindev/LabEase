@@ -29,7 +29,7 @@ export default function Sidebar({ isOpen, userType }) {
           { id: 'admin-bookings', icon: FiCalendar, label: 'Bookings', path: '/admin/bookings' },
           { id: 'admin-tests', icon: FiFileText, label: 'Tests', path: '/admin/tests' },
           { id: 'admin-users', icon: FiUsers, label: 'Users', path: '/admin/users' },
-          { id: 'admin-analytics', icon: FiBarChart2, label: 'Analytics', path: '/admin/dashboard' },
+          { id: 'admin-analytics', icon: FiBarChart2, label: 'Analytics', path: '/admin/analytics' },
         ];
       default:
         return [];

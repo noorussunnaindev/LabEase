@@ -22,6 +22,7 @@ import AdminDashboard from '../pages/admin/Dashboard.jsx';
 import AdminBookings from '../pages/admin/Bookings.jsx';
 import AdminTests from '../pages/admin/Tests.jsx';
 import AdminUsers from '../pages/admin/Users.jsx';
+import AdminAnalytics from '../pages/admin/Analytics.jsx';
 
 const ProtectedRoute = ({ children, requiredRole }) => {
   const { isAuthenticated, userRole, loading } = useAuth();
@@ -96,6 +97,7 @@ export default function AppRoutes() {
                 <Route path="bookings" element={<AdminBookings />} />
                 <Route path="tests" element={<AdminTests />} />
                 <Route path="users" element={<AdminUsers />} />
+                <Route path="analytics" element={<AdminAnalytics />} />
               </Routes>
             </AdminLayout>
           </ProtectedRoute>

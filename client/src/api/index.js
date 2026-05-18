@@ -115,4 +115,9 @@ export const userAPI = {
   getStats: () => api.get('/users/stats'),
 };
 
+// Analytics API calls
+export const analyticsAPI = {
+  getAnalytics: () => api.get('/analytics'),
+};
+
 export default api;
