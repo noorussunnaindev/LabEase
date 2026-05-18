@@ -1,5 +1,5 @@
 import { User } from '../entities/User.js';
-import { getRepository, updateEntity, findEntity, paginate } from '../utils/database.js';
+import { getRepository, updateEntity, findEntity, paginate, deleteEntity } from '../utils/database.js';
 import { hashPassword } from '../utils/helpers.js';
 import { AppError } from '../middleware/errorHandler.js';
 
@@ -56,6 +56,14 @@ export class UserService {
 
   async deactivateUser(id) {
     return updateEntity(User, id, { isActive: false });
+  }
+
+  async deleteUser(id) {
+    const user = await findEntity(User, { id });
+    if (!user) {
+      throw new AppError('User not found', 404);
+    }
+    return deleteEntity(User, id);
   }
 
   async getUserStats() {

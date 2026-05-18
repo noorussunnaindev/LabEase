@@ -7,6 +7,7 @@ import {
   getUsersByRole,
   activateUser,
   deactivateUser,
+  deleteUser,
   getUserStats
 } from '../controllers/userController.js';
 import { authenticate, authorize } from '../middleware/auth.js';
@@ -26,5 +27,6 @@ router.get('/role/:role', authenticate, authorize('ADMIN'), getUsersByRole);
 router.get('/', authenticate, authorize('ADMIN'), getAllUsers);
 router.put('/:id/activate', authenticate, authorize('ADMIN'), activateUser);
 router.put('/:id/deactivate', authenticate, authorize('ADMIN'), deactivateUser);
+router.delete('/:id', authenticate, authorize('ADMIN'), deleteUser);
 
 export default router;

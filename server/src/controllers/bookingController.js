@@ -183,3 +183,17 @@ export const updatePaymentStatus = async (req, res, next) => {
     next(error);
   }
 };
+
+export const deleteBooking = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    await bookingService.deleteBooking(id);
+
+    res.status(200).json({
+      success: true,
+      message: 'Booking deleted successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+};

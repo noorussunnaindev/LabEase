@@ -74,6 +74,7 @@ export const bookingAPI = {
   updatePaymentStatus: (id, data) =>
     api.put(`/bookings/${id}/payment`, data),
   cancelBooking: (id) => api.put(`/bookings/${id}/cancel`),
+  deleteBooking: (id) => api.delete(`/bookings/${id}`),
   searchBookings: (criteria) => api.get('/bookings/search', { params: criteria }),
   getStats: () => api.get('/bookings/stats'),
 };
@@ -110,6 +111,7 @@ export const userAPI = {
     api.get('/users', { params: { page, limit, role } }),
   activateUser: (id) => api.put(`/users/${id}/activate`),
   deactivateUser: (id) => api.put(`/users/${id}/deactivate`),
+  deleteUser: (id) => api.delete(`/users/${id}`),
   getStats: () => api.get('/users/stats'),
 };
 

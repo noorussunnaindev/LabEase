@@ -3,7 +3,7 @@ import { BookingTest } from '../entities/BookingTest.js';
 import { Test } from '../entities/Test.js';
 import { Invoice } from '../entities/Invoice.js';
 import { Report } from '../entities/Report.js';
-import { getRepository, createEntity, updateEntity, findEntity, paginate } from '../utils/database.js';
+import { getRepository, createEntity, updateEntity, findEntity, paginate, deleteEntity } from '../utils/database.js';
 import { generateBookingNumber, generateInvoiceNumber } from '../utils/helpers.js';
 import { BOOKING_STATUS } from '../constants/index.js';
 import { AppError } from '../middleware/errorHandler.js';
@@ -115,6 +115,14 @@ export class BookingService {
     }
 
     return updateEntity(Booking, id, { status: BOOKING_STATUS.CANCELLED });
+  }
+
+  async deleteBooking(id) {
+    const booking = await findEntity(Booking, { id });
+    if (!booking) {
+      throw new AppError('Booking not found', 404);
+    }
+    return deleteEntity(Booking, id);
   }
 
   async searchBookings(criteria = {}) {

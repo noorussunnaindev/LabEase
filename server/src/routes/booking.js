@@ -7,6 +7,7 @@ import {
   updateBookingStatus,
   updatePaymentStatus,
   cancelBooking,
+  deleteBooking,
   searchBookings,
   getBookingStats
 } from '../controllers/bookingController.js';
@@ -30,5 +31,6 @@ router.post('/', authenticate, authorize('CUSTOMER'), createBooking);
 router.put('/:id/cancel', authenticate, cancelBooking);
 router.put('/:id/payment', authenticate, authorize('CUSTOMER'), updatePaymentStatus);
 router.put('/:id/status', authenticate, authorize('ADMIN', 'LAB_STAFF'), updateBookingStatus);
+router.delete('/:id', authenticate, authorize('ADMIN'), deleteBooking);
 
 export default router;

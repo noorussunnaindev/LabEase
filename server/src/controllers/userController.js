@@ -114,6 +114,20 @@ export const deactivateUser = async (req, res, next) => {
   }
 };
 
+export const deleteUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    await userService.deleteUser(id);
+
+    res.status(200).json({
+      success: true,
+      message: 'User deleted successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getUserStats = async (req, res, next) => {
   try {
     const stats = await userService.getUserStats();

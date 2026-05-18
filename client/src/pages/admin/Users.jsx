@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(null);
 
   useEffect(() => {
     fetchUsers();
@@ -19,6 +20,24 @@ export default function AdminUsers() {
       toast.error('Failed to load users');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteUser = async (userId, userName) => {
+    if (!window.confirm(`Are you sure you want to delete ${userName}? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      setDeleting(userId);
+      await userAPI.deleteUser(userId);
+      setUsers(users.filter(u => u.id !== userId));
+      toast.success('User deleted successfully');
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error(error.response?.data?.message || 'Failed to delete user');
+    } finally {
+      setDeleting(null);
     }
   };
 
@@ -40,12 +59,13 @@ export default function AdminUsers() {
               <th className="text-left py-3 px-4 font-bold">Role</th>
               <th className="text-left py-3 px-4 font-bold">Status</th>
               <th className="text-left py-3 px-4 font-bold">Created</th>
+              <th className="text-left py-3 px-4 font-bold">Actions</th>
             </tr>
           </thead>
           <tbody>
             {users.length === 0 ? (
               <tr>
-                <td colSpan="5" className="text-center py-6 text-gray-500">
+                <td colSpan="6" className="text-center py-6 text-gray-500">
                   No users found
                 </td>
               </tr>
@@ -73,6 +93,15 @@ export default function AdminUsers() {
                   </td>
                   <td className="py-3 px-4 text-gray-600">
                     {new Date(user.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="py-3 px-4">
+                    <button
+                      onClick={() => handleDeleteUser(user.id, `${user.firstName} ${user.lastName}`)}
+                      disabled={deleting === user.id}
+                      className="px-3 py-1 bg-red-100 text-red-700 rounded text-xs font-semibold hover:bg-red-200 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                    >
+                      {deleting === user.id ? 'Deleting...' : 'Delete'}
+                    </button>
                   </td>
                 </tr>
               ))
