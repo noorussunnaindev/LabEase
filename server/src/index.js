@@ -14,6 +14,7 @@ import reportRoutes from './routes/report.js';
 import paymentRoutes from './routes/payment.js';
 import userRoutes from './routes/user.js';
 import analyticsRoutes from './routes/analytics.js';
+import invoiceRoutes from './routes/invoice.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -46,6 +47,7 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/invoices', invoiceRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -120,4 +120,13 @@ export const analyticsAPI = {
   getAnalytics: () => api.get('/analytics'),
 };
 
+// Invoice API calls
+export const invoiceAPI = {
+  getInvoice: (bookingId) => api.get(`/invoices/booking/${bookingId}`),
+  createInvoice: (bookingId) => api.post(`/invoices/create/${bookingId}`),
+  downloadInvoice: (bookingId) => api.get(`/invoices/download/${bookingId}`),
+  getMyInvoices: (page = 1, limit = 10) =>
+    api.get('/invoices/my-invoices', { params: { page, limit } }),
+};
+
 export default api;

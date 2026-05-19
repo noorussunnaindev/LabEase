@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { bookingAPI } from '../../api/index.js';
+import { bookingAPI, invoiceAPI } from '../../api/index.js';
 import toast from 'react-hot-toast';
 
 export default function AdminBookings() {
@@ -27,6 +27,19 @@ export default function AdminBookings() {
   const handleStatusChange = async (bookingId, newStatus) => {
     try {
       setUpdating(bookingId);
+      
+      // If changing to COMPLETED, ensure invoice exists first
+      if (newStatus === 'COMPLETED') {
+        try {
+          await invoiceAPI.createInvoice(bookingId);
+        } catch (error) {
+          // Invoice might already exist, which is fine
+          if (error.response?.status !== 409) {
+            console.log('Invoice creation info:', error.response?.data?.message);
+          }
+        }
+      }
+
       const res = await bookingAPI.updateBookingStatus(bookingId, newStatus);
       setBookings(bookings.map(b => b.id === bookingId ? res.data.data : b));
       toast.success(`Booking status updated to ${newStatus}`);

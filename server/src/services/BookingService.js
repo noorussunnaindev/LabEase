@@ -104,6 +104,26 @@ export class BookingService {
       throw new AppError('Invalid status', 400);
     }
 
+    // If changing to COMPLETED, verify invoice exists
+    if (status === BOOKING_STATUS.COMPLETED) {
+      const booking = await findEntity(Booking, { id });
+      if (!booking) {
+        throw new AppError('Booking not found', 404);
+      }
+
+      const invoiceRepo = getRepository(Invoice);
+      const invoice = await invoiceRepo.findOne({
+        where: { bookingId: id }
+      });
+
+      if (!invoice) {
+        throw new AppError(
+          'Invoice must be created before marking booking as COMPLETED. Please create an invoice first.',
+          400
+        );
+      }
+    }
+
     return updateEntity(Booking, id, { status });
   }
 

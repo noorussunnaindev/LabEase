@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { bookingAPI } from '../../api/index.js';
+import { bookingAPI, invoiceAPI } from '../../api/index.js';
 import { FiEdit, FiDownload, FiCheckCircle, FiClock } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import Modal from '../../components/modals/Modal.jsx';
@@ -13,6 +13,7 @@ export default function StaffBookings() {
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [reportFile, setReportFile] = useState(null);
   const [uploadingReport, setUploadingReport] = useState(false);
+  const [downloadingInvoice, setDownloadingInvoice] = useState(false);
 
   useEffect(() => {
     fetchBookings();
@@ -66,12 +67,25 @@ export default function StaffBookings() {
 
     setUpdatingStatus(true);
     try {
+      // If changing to COMPLETED, ensure invoice exists first
+      if (nextStatus === 'COMPLETED') {
+        try {
+          await invoiceAPI.createInvoice(selectedBooking.id);
+        } catch (error) {
+          // Invoice might already exist, which is fine
+          if (error.response?.status !== 409) {
+            console.log('Invoice creation info:', error.response?.data?.message);
+          }
+        }
+      }
+
       await bookingAPI.updateBookingStatus(selectedBooking.id, nextStatus);
       toast.success(`Status updated to ${nextStatus}`);
       setSelectedBooking({ ...selectedBooking, status: nextStatus });
       fetchBookings();
     } catch (error) {
-      toast.error('Failed to update status');
+      const errorMsg = error.response?.data?.message || 'Failed to update status';
+      toast.error(errorMsg);
     } finally {
       setUpdatingStatus(false);
     }
@@ -96,6 +110,53 @@ export default function StaffBookings() {
       toast.error('Failed to upload report');
     } finally {
       setUploadingReport(false);
+    }
+  };
+
+  const handleDownloadInvoice = async () => {
+    if (!selectedBooking) {
+      toast.error('No booking selected');
+      return;
+    }
+
+    setDownloadingInvoice(true);
+    try {
+      // First, ensure invoice exists by creating one if needed
+      try {
+        await invoiceAPI.createInvoice(selectedBooking.id);
+      } catch (error) {
+        // Invoice might already exist, which is fine
+        if (error.response?.status !== 409) {
+          console.log('Invoice creation info:', error.response?.data?.message);
+        }
+      }
+
+      // Now get the invoice data for download
+      const response = await invoiceAPI.downloadInvoice(selectedBooking.id);
+      
+      if (response.data.success && response.data.data) {
+        const invoiceData = response.data.data;
+        
+        // Create a Blob from the HTML content and download it
+        const htmlContent = invoiceData.htmlContent;
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Invoice_${invoiceData.invoiceNumber}.html`;
+        document.body.appendChild(link);
+        link.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(link);
+        
+        toast.success('Invoice downloaded successfully');
+      }
+    } catch (error) {
+      const errorMsg = error.response?.data?.message || 'Failed to download invoice';
+      toast.error(errorMsg);
+      console.error('Invoice download error:', error);
+    } finally {
+      setDownloadingInvoice(false);
     }
   };
 
@@ -392,13 +453,14 @@ export default function StaffBookings() {
               >
                 Close
               </button>
-              <a
-                href="#"
-                className="flex-1 px-4 py-3 bg-blue-50 text-blue-600 font-bold rounded-lg hover:bg-blue-100 transition-colors flex items-center justify-center gap-2"
+              <button
+                onClick={handleDownloadInvoice}
+                disabled={downloadingInvoice}
+                className="flex-1 px-4 py-3 bg-blue-50 text-blue-600 font-bold rounded-lg hover:bg-blue-100 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
               >
                 <FiDownload size={18} />
-                Download Invoice
-              </a>
+                {downloadingInvoice ? 'Downloading...' : 'Download Invoice'}
+              </button>
             </div>
           </div>
         </Modal>
