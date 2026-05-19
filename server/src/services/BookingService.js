@@ -172,4 +172,8 @@ export class BookingService {
 
     return { total, completed, pending };
   }
+
+  async updatePaymentStatus(bookingId, paymentStatus) {
+    return updateEntity(Booking, bookingId, { paymentStatus });
+  }
 }

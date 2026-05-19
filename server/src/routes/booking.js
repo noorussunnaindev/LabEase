@@ -5,6 +5,7 @@ import {
   getMyBookings,
   getAllBookings,
   updateBookingStatus,
+  updatePaymentStatus,
   cancelBooking,
   searchBookings,
   getBookingStats
@@ -27,6 +28,7 @@ router.post('/', authenticate, authorize('CUSTOMER'), createBooking);
 
 // Update routes
 router.put('/:id/cancel', authenticate, cancelBooking);
+router.put('/:id/payment', authenticate, authorize('CUSTOMER'), updatePaymentStatus);
 router.put('/:id/status', authenticate, authorize('ADMIN', 'LAB_STAFF'), updateBookingStatus);
 
 export default router;

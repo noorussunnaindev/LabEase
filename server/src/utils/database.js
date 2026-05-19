@@ -40,12 +40,13 @@ export const deleteEntity = async (entity, id) => {
   await repository.delete(id);
 };
 
-export const paginate = async (entity, page = 1, limit = 10, criteria = {}) => {
+export const paginate = async (entity, page = 1, limit = 10, criteria = {}, relations = []) => {
   const repository = getRepository(entity);
   const skip = (page - 1) * limit;
 
   const [data, total] = await repository.findAndCount({
     where: criteria,
+    relations,
     skip,
     take: limit,
     order: { createdAt: 'DESC' }

@@ -71,6 +71,8 @@ export const bookingAPI = {
     api.get('/bookings', { params: { page, limit, status } }),
   updateBookingStatus: (id, status) =>
     api.put(`/bookings/${id}/status`, { status }),
+  updatePaymentStatus: (id, data) =>
+    api.put(`/bookings/${id}/payment`, data),
   cancelBooking: (id) => api.put(`/bookings/${id}/cancel`),
   searchBookings: (criteria) => api.get('/bookings/search', { params: criteria }),
   getStats: () => api.get('/bookings/stats'),

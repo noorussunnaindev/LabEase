@@ -1,12 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { testAPI, bookingAPI, paymentAPI } from '../../api/index.js';
+import { testAPI, bookingAPI, categoryAPI, paymentAPI } from '../../api/index.js';
 import toast from 'react-hot-toast';
 
 export default function Booking() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [tests, setTests] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedTests, setSelectedTests] = useState([]);
   const [formData, setFormData] = useState({
     testIds: [],
     bookingType: 'LAB_VISIT',
@@ -18,21 +22,65 @@ export default function Booking() {
     pincode: '',
   });
 
+  useEffect(() => {
+    fetchCategoriesAndTests();
+  }, [selectedCategory]);
+
+  const fetchCategoriesAndTests = async () => {
+    try {
+      const [catRes, testRes] = await Promise.all([
+        categoryAPI.getCategories(),
+        testAPI.getTests(1, 100, selectedCategory),
+      ]);
+      setCategories(catRes.data.data);
+      setTests(testRes.data.data.data);
+    } catch (error) {
+      toast.error('Failed to load tests');
+    }
+  };
+
+  const handleTestToggle = (test) => {
+    const isSelected = selectedTests.some(t => t.id === test.id);
+    if (isSelected) {
+      setSelectedTests(selectedTests.filter(t => t.id !== test.id));
+    } else {
+      setSelectedTests([...selectedTests, test]);
+    }
+  };
+
+  const getTotalPrice = () => {
+    return selectedTests.reduce((sum, test) => sum + parseFloat(test.price || 0), 0).toFixed(2);
+  };
+
+  const handleNextStep = () => {
+    if (step === 1) {
+      if (selectedTests.length === 0) {
+        toast.error('Please select at least one test');
+        return;
+      }
+      setFormData({
+        ...formData,
+        testIds: selectedTests.map(t => t.id)
+      });
+    }
+    setStep(step + 1);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
       // Create booking
-      const bookingRes = await bookingAPI.createBooking(formData);
+      const bookingData = {
+        ...formData,
+        testIds: selectedTests.map(t => t.id)
+      };
+      const bookingRes = await bookingAPI.createBooking(bookingData);
       const booking = bookingRes.data.data;
 
-      // Create payment session
-      const paymentRes = await paymentAPI.createSession(booking.id);
-      const { sessionId } = paymentRes.data.data;
-
-      // Redirect to Stripe checkout
-      window.location.href = `${process.env.VITE_STRIPE_REDIRECT_URL}?session_id=${sessionId}`;
+      toast.success('Booking created successfully');
+      navigate(`/customer/bookings/${booking.id}`);
     } catch (error) {
       toast.error('Failed to create booking');
       setLoading(false);
@@ -46,7 +94,7 @@ export default function Booking() {
       <form onSubmit={handleSubmit} className="card space-y-6">
         {/* Step indicators */}
         <div className="flex gap-4 mb-8">
-          {[1, 2, 3].map((s) => (
+          {[1, 2, 3, 4].map((s) => (
             <div
               key={s}
               className={`flex-1 h-2 rounded-full ${
@@ -57,6 +105,88 @@ export default function Booking() {
         </div>
 
         {step === 1 && (
+          <div className="space-y-4">
+            <h2 className="text-lg font-bold">Select Tests</h2>
+            
+            {/* Category Filter */}
+            <div>
+              <label className="block text-sm font-medium mb-3">Categories</label>
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategory(null)}
+                  className={`block w-full text-left px-4 py-2 rounded border-2 ${
+                    !selectedCategory ? 'border-blue-600 bg-blue-50' : 'border-gray-200'
+                  }`}
+                >
+                  All Tests
+                </button>
+                {categories.map((cat) => (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => setSelectedCategory(cat.id)}
+                    className={`block w-full text-left px-4 py-2 rounded border-2 ${
+                      selectedCategory === cat.id ? 'border-blue-600 bg-blue-50' : 'border-gray-200'
+                    }`}
+                  >
+                    {cat.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Tests List */}
+            <div>
+              <label className="block text-sm font-medium mb-3">Available Tests</label>
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {tests.length === 0 ? (
+                  <p className="text-gray-500 text-center py-4">No tests available</p>
+                ) : (
+                  tests.map((test) => (
+                    <label
+                      key={test.id}
+                      className="flex items-start p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-400 hover:bg-blue-50"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedTests.some(t => t.id === test.id)}
+                        onChange={() => handleTestToggle(test)}
+                        className="mt-1 w-5 h-5"
+                      />
+                      <div className="ml-4 flex-1">
+                        <p className="font-medium">{test.testName}</p>
+                        <p className="text-sm text-gray-600">{test.description}</p>
+                        <p className="text-xs text-gray-500 mt-1">⏱ {test.duration} mins</p>
+                      </div>
+                      <span className="ml-4 text-lg font-bold text-blue-600">${parseFloat(test.price || 0).toFixed(2)}</span>
+                    </label>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Selected Tests Summary */}
+            {selectedTests.length > 0 && (
+              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <p className="font-medium mb-2">Selected Tests ({selectedTests.length})</p>
+                <div className="space-y-1">
+                  {selectedTests.map((test) => (
+                    <div key={test.id} className="flex justify-between text-sm">
+                      <span>{test.testName}</span>
+                      <span>${parseFloat(test.price || 0).toFixed(2)}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="border-t border-blue-200 mt-2 pt-2 font-bold text-lg">
+                  Total: ${getTotalPrice()}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {step === 2 && (
           <div className="space-y-4">
             <h2 className="text-lg font-bold">Select Booking Type</h2>
             <div className="space-y-2">
@@ -90,7 +220,7 @@ export default function Booking() {
           </div>
         )}
 
-        {step === 2 && (
+        {step === 3 && (
           <div className="space-y-4">
             <h2 className="text-lg font-bold">Select Date & Time</h2>
             <div className="grid md:grid-cols-2 gap-4">
@@ -118,7 +248,7 @@ export default function Booking() {
           </div>
         )}
 
-        {step === 3 && (
+        {step === 4 && (
           <div className="space-y-4">
             <h2 className="text-lg font-bold">Address Details</h2>
             <div>
@@ -177,10 +307,10 @@ export default function Booking() {
               Back
             </button>
           )}
-          {step < 3 ? (
+          {step < 4 ? (
             <button
               type="button"
-              onClick={() => setStep(step + 1)}
+              onClick={handleNextStep}
               className="btn-primary ml-auto"
             >
               Next
@@ -191,7 +321,7 @@ export default function Booking() {
               disabled={loading}
               className="btn-primary ml-auto"
             >
-              {loading ? 'Processing...' : 'Proceed to Payment'}
+              {loading ? 'Processing...' : 'Create Booking'}
             </button>
           )}
         </div>

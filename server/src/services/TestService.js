@@ -18,7 +18,7 @@ export class TestService {
 
   async getTests(page = 1, limit = 10, categoryId = null) {
     const criteria = categoryId ? { categoryId, isActive: true } : { isActive: true };
-    return paginate(Test, page, limit, criteria);
+    return paginate(Test, page, limit, criteria, ['category']);
   }
 
   async getTestById(id) {

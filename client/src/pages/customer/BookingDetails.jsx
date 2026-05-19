@@ -7,6 +7,7 @@ export default function BookingDetails() {
   const { id } = useParams();
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [paymentLoading, setPaymentLoading] = useState(false);
 
   useEffect(() => {
     fetchBooking();
@@ -23,8 +24,23 @@ export default function BookingDetails() {
     }
   };
 
+  const handlePayNow = async () => {
+    setPaymentLoading(true);
+    try {
+      const res = await bookingAPI.updatePaymentStatus(id, { paymentStatus: 'PAID' });
+      setBooking(res.data.data);
+      toast.success('Payment successful!');
+    } catch (error) {
+      toast.error('Payment failed');
+    } finally {
+      setPaymentLoading(false);
+    }
+  };
+
   if (loading) return <div>Loading...</div>;
   if (!booking) return <div>Booking not found</div>;
+
+  const isPaid = booking.paymentStatus === 'PAID';
 
   return (
     <div className="max-w-2xl mx-auto space-y-8">
@@ -40,7 +56,9 @@ export default function BookingDetails() {
           <div className={`badge badge-${booking.status === 'COMPLETED' ? 'success' : 'info'}`}>
             {booking.status}
           </div>
-          <p className="text-gray-600">Payment: {booking.paymentStatus}</p>
+          <div className={`badge badge-${isPaid ? 'success' : 'warning'}`}>
+            Payment: {booking.paymentStatus}
+          </div>
         </div>
       </div>
 
@@ -91,6 +109,35 @@ export default function BookingDetails() {
             {booking.address}<br />
             {booking.city}, {booking.state} {booking.pincode}
           </p>
+        </div>
+      )}
+
+      {/* Payment Section */}
+      {!isPaid && (
+        <div className="card bg-blue-50 border-2 border-blue-200">
+          <h2 className="font-bold mb-4">Payment Required</h2>
+          <p className="text-gray-700 mb-4">
+            Total Amount: <span className="font-bold text-xl text-blue-600">${booking.totalAmount}</span>
+          </p>
+          <button
+            onClick={handlePayNow}
+            disabled={paymentLoading}
+            className="btn-primary w-full"
+          >
+            {paymentLoading ? 'Processing...' : 'Pay Now'}
+          </button>
+        </div>
+      )}
+
+      {isPaid && (
+        <div className="card bg-green-50 border-2 border-green-200">
+          <div className="flex items-center space-x-3">
+            <span className="text-3xl">✓</span>
+            <div>
+              <h2 className="font-bold">Payment Completed</h2>
+              <p className="text-gray-600 text-sm">Your booking has been confirmed and paid</p>
+            </div>
+          </div>
         </div>
       )}
     </div>

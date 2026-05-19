@@ -158,3 +158,28 @@ export const getBookingStats = async (req, res, next) => {
     next(error);
   }
 };
+
+export const updatePaymentStatus = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { paymentStatus } = req.body;
+
+    if (!paymentStatus) {
+      throw new AppError('Payment status required', 400);
+    }
+
+    if (!['UNPAID', 'PAID', 'PENDING'].includes(paymentStatus)) {
+      throw new AppError('Invalid payment status', 400);
+    }
+
+    const booking = await bookingService.updatePaymentStatus(id, paymentStatus);
+
+    res.status(200).json({
+      success: true,
+      data: booking,
+      message: 'Payment status updated'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
