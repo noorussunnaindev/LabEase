@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { testAPI, categoryAPI } from '../../api/index.js';
 import { FiSearch, FiFilter } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 export default function TestCatalog() {
+  const navigate = useNavigate();
   const [tests, setTests] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -42,6 +44,10 @@ export default function TestCatalog() {
     } catch (error) {
       toast.error('Search failed');
     }
+  };
+
+  const handleBookNow = (test) => {
+    navigate('/customer/new-booking', { state: { selectedTest: test } });
   };
 
   return (
@@ -126,7 +132,11 @@ export default function TestCatalog() {
                     <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
                       <span>⏱ {test.duration} mins</span>
                     </div>
-                    <button className="btn-primary w-full">
+                    <button 
+                      type="button"
+                      onClick={() => handleBookNow(test)}
+                      className="btn-primary w-full"
+                    >
                       Book Now
                     </button>
                   </div>

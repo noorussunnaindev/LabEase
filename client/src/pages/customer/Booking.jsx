@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { testAPI, bookingAPI, categoryAPI, paymentAPI } from '../../api/index.js';
 import toast from 'react-hot-toast';
 
 export default function Booking() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [tests, setTests] = useState([]);
@@ -24,7 +25,16 @@ export default function Booking() {
 
   useEffect(() => {
     fetchCategoriesAndTests();
-  }, [selectedCategory]);
+    // Pre-select test if passed from TestCatalog
+    if (location.state?.selectedTest) {
+      const selectedTest = location.state.selectedTest;
+      setSelectedTests([selectedTest]);
+      // Set category if test has one
+      if (selectedTest.categoryId) {
+        setSelectedCategory(selectedTest.categoryId);
+      }
+    }
+  }, [location.state?.selectedTest, selectedCategory]);
 
   const fetchCategoriesAndTests = async () => {
     try {
