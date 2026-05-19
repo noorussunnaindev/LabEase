@@ -96,7 +96,7 @@ export class BookingService {
 
   async getAllBookings(page = 1, limit = 10, status = null) {
     const criteria = status ? { status } : {};
-    return paginate(Booking, page, limit, criteria);
+    return paginate(Booking, page, limit, criteria, ['user', 'bookingTests', 'bookingTests.test']);
   }
 
   async updateBookingStatus(id, status) {
