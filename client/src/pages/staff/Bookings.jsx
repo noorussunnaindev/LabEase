@@ -11,6 +11,7 @@ export default function StaffBookings() {
   const [showModal, setShowModal] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [updatingBookingId, setUpdatingBookingId] = useState(null);
   const [reportFile, setReportFile] = useState(null);
   const [uploadingReport, setUploadingReport] = useState(false);
   const [downloadingInvoice, setDownloadingInvoice] = useState(false);
@@ -54,6 +55,38 @@ export default function StaffBookings() {
       REPORT_READY: 'COMPLETED',
     };
     return statusFlow[currentStatus];
+  };
+
+  const handleStatusBadgeClick = async (booking) => {
+    const nextStatus = getNextStatus(booking.status);
+    if (!nextStatus) {
+      toast.error('This booking cannot be updated further');
+      return;
+    }
+
+    setUpdatingBookingId(booking.id);
+    try {
+      // If changing to COMPLETED, ensure invoice exists first
+      if (nextStatus === 'COMPLETED') {
+        try {
+          await invoiceAPI.createInvoice(booking.id);
+        } catch (error) {
+          // Invoice might already exist, which is fine
+          if (error.response?.status !== 409) {
+            console.log('Invoice creation info:', error.response?.data?.message);
+          }
+        }
+      }
+
+      await bookingAPI.updateBookingStatus(booking.id, nextStatus);
+      setBookings(bookings.map(b => b.id === booking.id ? { ...b, status: nextStatus } : b));
+      toast.success(`Status updated to ${nextStatus}`);
+    } catch (error) {
+      const errorMsg = error.response?.data?.message || 'Failed to update status';
+      toast.error(errorMsg);
+    } finally {
+      setUpdatingBookingId(null);
+    }
   };
 
   const handleUpdateStatus = async () => {
@@ -289,19 +322,17 @@ export default function StaffBookings() {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`badge px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}>
-                      {booking.status}
-                    </span>
+                    <button
+                      onClick={() => handleStatusBadgeClick(booking)}
+                      disabled={updatingBookingId === booking.id}
+                      className={`badge px-3 py-1 rounded-full text-xs font-medium cursor-pointer transition hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed ${getStatusColor(booking.status)}`}
+                    >
+                      {updatingBookingId === booking.id ? 'Updating...' : booking.status}
+                    </button>
                   </td>
                   <td className="px-6 py-4 font-semibold">${booking.totalAmount}</td>
                   <td className="px-6 py-4">
-                    <button
-                      onClick={() => openBookingModal(booking)}
-                      className="inline-flex items-center gap-2 px-3 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg font-medium transition-colors"
-                    >
-                      <FiEdit size={16} />
-                      Manage
-                    </button>
+                    {/* Status is now clickable in Status column */}
                   </td>
                 </tr>
               ))}
