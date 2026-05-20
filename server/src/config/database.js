@@ -12,15 +12,11 @@ import { Payment } from '../entities/Payment.js';
 export const AppDataSource = new DataSource({
   type: 'postgres',
 
-  host: process.env.DB_HOST || 'localhost',
+  url: process.env.DATABASE_URL,
 
-  port: parseInt(process.env.DB_PORT || '5432'),
-
-  username: process.env.DB_USERNAME || 'labease_user',
-
-  password: process.env.DB_PASSWORD || 'password',
-
-  database: process.env.DB_DATABASE || 'labease_db',
+  ssl: {
+    rejectUnauthorized: false,
+  },
 
   synchronize: process.env.NODE_ENV !== 'production',
 
