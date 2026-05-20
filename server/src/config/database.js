@@ -9,6 +9,8 @@ import { Report } from '../entities/Report.js';
 import { Invoice } from '../entities/Invoice.js';
 import { Payment } from '../entities/Payment.js';
 
+console.log('DATABASE_URL:', process.env.DATABASE_URL);
+
 export const AppDataSource = new DataSource({
   type: 'postgres',
 
