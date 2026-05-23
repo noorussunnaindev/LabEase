@@ -24,7 +24,10 @@ app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
 
 // Middleware
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'https://labease-swg3.onrender.com',
+  origin: [
+    "http://localhost:5173",
+    "https://labease-1-2wwp.onrender.com"
+  ],
   credentials: true
 }));
 app.use(express.json());
