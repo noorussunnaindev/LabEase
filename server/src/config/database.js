@@ -14,7 +14,7 @@ console.log('DATABASE_URL:', process.env.DATABASE_URL);
 export const AppDataSource = new DataSource({
   type: 'postgres',
 
-  url: process.env.DATABASE_URL,
+  url: process.env.DATABASE_URL?.trim(),
 
   ssl: {
     rejectUnauthorized: false,
